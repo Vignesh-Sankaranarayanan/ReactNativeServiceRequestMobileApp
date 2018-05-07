@@ -1,7 +1,12 @@
 import React, { Component } from 'react';
-import registerForPushNotificationsAsync from 'registerForPushNotificationsAsync';
+
 import { StyleSheet, Text, View, Button, Alert ,TextInput} from 'react-native';
-import * as firebase from 'firebase'
+import * as firebase from 'firebase';
+import { Header } from 'react-native-elements';
+import {
+  ImageBackground,
+  AppRegistry,
+} from 'react-native';
 
 //var USERS_LOCATION = 'https://af2-lists-4a30d.firebaseio.com/users';
 const firebaseConfig = {
@@ -13,7 +18,7 @@ const firebaseConfig = {
             projectId: "af2-lists-4a30d"
 };
 firebase.initializeApp(firebaseConfig);
-
+const remote = 'https://s3.amazonaws.com/documentmisc/vAGZp.jpg';
 export default class App extends Component<{}> {
  
   state = {
@@ -67,27 +72,7 @@ export default class App extends Component<{}> {
  
     
   }
-  _registerForPushNotifications() {
-    // Send our push token over to our backend so we can receive notifications
-    // You can comment the following line out if you want to stop receiving
-    // a notification every time you open the app. Check out the source
-    // for this function in api/registerForPushNotificationsAsync.js
-    registerForPushNotificationsAsync();
-
-    // Watch for incoming notifications
-    this._notificationSubscription = Notifications.addListener(
-      this._handleNotification
-    );
-  }
-  _handleNotification = (notification) => {
-    this.userID = this.state.phonenumber;
-    this.props.navigation.navigate('Notifications');
-    this.setState({ notification: notification });
-
-    firebase.database().ref('users/' + this.userID + '/notifications').push(notification.data);
-  };
-
-
+  
   userExistsCallback(userId, exists) {
     if (exists) {
       Alert.alert('user ' + userId + ' exists!');
@@ -95,12 +80,18 @@ export default class App extends Component<{}> {
       Alert.alert('user ' + userId + ' does not exist!');
     }
   }
-  
+  validateEmail = (email) => {
+    var re = /^[0-9.,]+$/;
+      return re.test(email);
+  };
   // Tests to see if /users/<userId> has any data. 
   checkIfUserExists(userId) {
-    var usersRef = firebase.database().ref("/users/");
-    registerForPushNotificationsAsync();
-    usersRef.child(userId).once('value', function(snapshot) {
+    if (!this.validateEmail(this.state.phonenumber)) {
+      Alert.alert('user ' + userId + ' is not valid, enter a valid Phonenumber');
+    } else {
+     
+      var usersRef = firebase.database().ref("/users/");
+      usersRef.child(userId).once('value', function(snapshot) {
       var exists = (snapshot.val() !== null);
       if(!exists){
         firebase.database().ref('users/' + userId).set({
@@ -109,45 +100,95 @@ export default class App extends Component<{}> {
      
   });
   Alert.alert("Request is added, you will receive call : "+userId);
-  
+  this.text.clear();
       }
       else{
         Alert.alert("Request exists.So please wait for the call from Admin");
+        this.text.clear();
       }
     });
+    }
+    
     
   }
   
   render() {
+   
     return (
       <View style={styles.container}>
- 
- <TextInput 
- style={styles.textInput}
+ <ImageBackground source={require('/Users/vigneshsankaranarayanan/Documents/my-project/images/vAGZp.jpg')} style={styles.backgroundImage}>
+                <View style={ styles.loginForm }>
+                <Header
+  leftComponent={{ icon: 'menu', color: '#fff' }}
+  //statusBarProps={{ barStyle: 'light-content' }}
+  centerComponent={{ text: 'Service Requester', style: { color: '#fff' } }}
+  outerContainerStyles={{ backgroundColor: '#1d5086' }}
+  //innerContainerStyles={{ justifyContent: 'space-around' }}
+  rightComponent={{ icon: 'home', color: '#fff' }}
+/>
+                
+                <TextInput 
+ //style={styles.input}
+ style={styles.input}
+ multiline={true}
+
  keyboardType='numeric'
- underlineColorAndroid = "transparent"
- placeholder = "Enter your Phonenumber"
- placeholderTextColor = "#9a73ef"
+ 
+ placeholder = "  Enter your Phonenumber  "
+ placeholderTextColor = "#000000"
+ 
  maxLength={10} 
  onChangeText = {(text)=> this.onChange(text)}
  value = {this.state.phonenumber}/>
-        <View style={{margin: 10}}>
-        <Text>Click the button to register a service request with the Admin.Admin will give you a callback</Text>
+        <View style={{margin: 2}}>
+        <Text style={styles.white}>Click the button to register a service request with the Admin.Admin will give you a callback</Text>
       
        <Button onPress={ this.checkIfUserExists.bind(this, this.state.phonenumber) } title=" Click to register a service" />
- 
+        
         </View>
-       
+        </View>
+ 
+            </ImageBackground>
       </View>
     );
   }
 }
  
 const styles = StyleSheet.create({
+  white: {
+    color: 'white',
+  },
   container: {
     flex: 1,
-    justifyContent: 'center',
-    
-    margin: 10
+},
+backgroundImage: {
+    flex: 1
+},
+loginForm: {
+    position: 'relative',
+    top: 0,
+    bottom: 0,
+    left: 0,
+    right: 0
+},
+  inputContainer: {
+    borderLeftWidth: 4,
+    borderRightWidth: 4,
+    borderTopWidth: 4,
+    borderBottomWidth: 4,
+    height: 20,
+    justifyContent: 'center'
+  },
+  input: {
+    height: 50,
+    backgroundColor: '#FFFFFF',
+    color:'black',
+    paddingLeft: 15,
+    paddingRight: 15,
+    borderLeftWidth: 4,
+    borderRightWidth: 4,
+    borderTopWidth: 4,
+    borderBottomWidth: 4,
+    justifyContent: 'center'
   }
 });
