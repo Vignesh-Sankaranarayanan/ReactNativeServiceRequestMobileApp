@@ -22,7 +22,7 @@ const remote = 'https://s3.amazonaws.com/documentmisc/vAGZp.jpg';
 export default class App extends Component<{}> {
  
   state = {
-    phonenumber: ''
+    text: ''
    
  }
  
@@ -50,11 +50,11 @@ export default class App extends Component<{}> {
             newText = newText + text[i];
         }
     }   
-    this.setState({phonenumber: newText})
+    this.setState({text: newText})
   }
   SampleFunction2(StringHolder){
     
-    Alert.alert(this.state.phonenumber);
+    Alert.alert(this._textInput.getNativeProps({text}));
     firebase.initializeApp(firebaseConfig);
     
     this.storeHighScore(this.state.phonenumber,1);
@@ -86,8 +86,9 @@ export default class App extends Component<{}> {
   };
   // Tests to see if /users/<userId> has any data. 
   checkIfUserExists(userId) {
-    if (!this.validateEmail(this.state.phonenumber)) {
+    if (!this.validateEmail(this.state.text)) {
       Alert.alert('user ' + userId + ' is not valid, enter a valid Phonenumber');
+      
     } else {
      
       var usersRef = firebase.database().ref("/users/");
@@ -100,11 +101,12 @@ export default class App extends Component<{}> {
      
   });
   Alert.alert("Request is added, you will receive call : "+userId);
-  this.text.clear();
+  
       }
       else{
+        
         Alert.alert("Request exists.So please wait for the call from Admin");
-        this.text.clear();
+        
       }
     });
     }
@@ -113,10 +115,10 @@ export default class App extends Component<{}> {
   }
   
   render() {
-   
+   //source={require('/Users/vigneshsankaranarayanan/Documents/my-project/images/1122287.jpg')}
     return (
       <View style={styles.container}>
- <ImageBackground source={require('/Users/vigneshsankaranarayanan/Documents/my-project/images/vAGZp.jpg')} style={styles.backgroundImage}>
+ <ImageBackground  style={styles.backgroundImage}>
                 <View style={ styles.loginForm }>
                 <Header
   leftComponent={{ icon: 'menu', color: '#fff' }}
@@ -129,6 +131,7 @@ export default class App extends Component<{}> {
                 
                 <TextInput 
  //style={styles.input}
+ ref={component => this._textInput = component}
  style={styles.input}
  multiline={true}
 
@@ -136,18 +139,19 @@ export default class App extends Component<{}> {
  
  placeholder = "  Enter your Phonenumber  "
  placeholderTextColor = "#000000"
- 
+ clearButtonMode="always" 
  maxLength={10} 
+ 
  onChangeText = {(text)=> this.onChange(text)}
- value = {this.state.phonenumber}/>
+ value = {this.state.text}/>
         <View style={{margin: 2}}>
-        <Text style={styles.white}>Click the button to register a service request with the Admin.Admin will give you a callback</Text>
+        <Text style={styles.white} >Click the button to register a service request with the Admin.Admin will give you a callback</Text>
       
-       <Button onPress={ this.checkIfUserExists.bind(this, this.state.phonenumber) } title=" Click to register a service" />
+       <Button onPress={ this.checkIfUserExists.bind(this, this.state.text) } title=" Click to register a service" />
         
         </View>
         </View>
- 
+  
             </ImageBackground>
       </View>
     );
